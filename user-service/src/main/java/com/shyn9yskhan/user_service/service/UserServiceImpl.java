@@ -4,6 +4,7 @@ import com.shyn9yskhan.user_service.dto.*;
 import com.shyn9yskhan.user_service.entity.UserEntity;
 import com.shyn9yskhan.user_service.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +15,11 @@ import java.util.UUID;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -28,11 +31,12 @@ public class UserServiceImpl implements UserService {
         String lastname = createUserRequest.lastname();
         String username = makeUniqueUsername(firstname, lastname);
         String password = generatePassword();
+        String encodedPassword = passwordEncoder.encode(password);
 
-        UserEntity userEntity = new UserEntity(firstname, lastname, username, password, true);
+        UserEntity userEntity = new UserEntity(firstname, lastname, username, encodedPassword, true);
         UserEntity saved = userRepository.save(userEntity);
 
-        return new CreateUserResponse(saved.getId(), saved.getUsername(), saved.getPassword());
+        return new CreateUserResponse(saved.getId(), saved.getUsername(), password);
     }
 
     @Override
@@ -180,10 +184,15 @@ public class UserServiceImpl implements UserService {
 
         UserEntity userEntity = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User not found with username: " + username));
 
-        if (!userEntity.getPassword().equals(changePasswordRequest.oldPassword())) {
+        String storedEncodedPassword = userEntity.getPassword();
+        String oldRawPassword = changePasswordRequest.oldPassword();
+        String newRawPassword = changePasswordRequest.newPassword();
+
+        if (!passwordEncoder.matches(oldRawPassword, storedEncodedPassword)) {
             throw new IllegalArgumentException("Old password does not match");
         }
-        userEntity.setPassword(changePasswordRequest.newPassword());
+        String encodedNewPassword = passwordEncoder.encode(newRawPassword);
+        userEntity.setPassword(encodedNewPassword);
         userRepository.save(userEntity);
     }
 
