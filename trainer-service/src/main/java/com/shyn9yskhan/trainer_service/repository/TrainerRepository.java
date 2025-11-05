@@ -17,7 +17,7 @@ public interface TrainerRepository extends JpaRepository<TrainerEntity, String> 
     List<TrainerEntity> findByUserIdIn(List<String> userIds);
 
     @Query("SELECT t.id FROM TrainerEntity t WHERE t.userId = :userId")
-    Optional<String> findIdByUserId(@Param("trainerId") String userId);
+    Optional<String> findIdByUserId(@Param("userId") String userId);
 
     @Query("SELECT t.specialization FROM TrainerEntity t WHERE t.id = :trainerId")
     Optional<String> findTrainingTypeIdByTrainerId(@Param("trainerId") String trainerId);

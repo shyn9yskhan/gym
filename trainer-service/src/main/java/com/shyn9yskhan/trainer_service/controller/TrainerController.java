@@ -39,16 +39,16 @@ public class TrainerController {
     }
 
     @GetMapping("/by-user-id/{userId}/id")
-    public ResponseEntity<GetTrainerIdByUserIdResponse> getTrainerIdByUserId(@PathVariable String userId) {
+    public ResponseEntity<GetTrainerIdByUserIdResponse> getTrainerIdByUserId(@PathVariable("userId") String userId) {
         return ResponseEntity.ok(trainerService.getTrainerIdByUserId(userId));
     }
 
-    @GetMapping
+    @GetMapping("/by-ids")
     public ResponseEntity<List<TrainerDto>> getTrainersByIds(@RequestParam List<String> trainerIds) {
         return ResponseEntity.ok(trainerService.getTrainersByIds(trainerIds));
     }
 
-    @GetMapping
+    @GetMapping("/by-user-ids")
     public ResponseEntity<List<TrainerDto>> getTrainersByUserIds(@RequestParam List<String> userIds) {
         return ResponseEntity.ok(trainerService.getTrainersByUserIds(userIds));
     }

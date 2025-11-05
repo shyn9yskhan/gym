@@ -1,5 +1,6 @@
 package com.shyn9yskhan.authentication_service.service;
 
+import com.shyn9yskhan.authentication_service.dto.Role;
 import com.shyn9yskhan.authentication_service.service.util.KeyUtil;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +11,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 
 @Component
 public class JwtService {
@@ -28,10 +30,22 @@ public class JwtService {
         this.keyId = keyId;
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String userId, Role role, String secondId) {
+        Objects.requireNonNull(userId, "userId is required");
+        Objects.requireNonNull(role, "role is required");
+        Objects.requireNonNull(secondId, "secondId is required");
+
         Instant now = Instant.now();
+        String secondIdClaimKey = switch (role) {
+            case TRAINEE -> "traineeId";
+            case TRAINER -> "trainerId";
+            default -> throw new IllegalArgumentException("Unsupported role: " + role);
+        };
+
         return Jwts.builder()
-                .subject(username)
+                .subject(userId)
+                .claim("role", role)
+                .claim(secondIdClaimKey, secondId)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusMillis(expirationMs)))
                 .header()

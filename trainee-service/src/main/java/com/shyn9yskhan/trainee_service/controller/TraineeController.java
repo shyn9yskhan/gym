@@ -34,7 +34,7 @@ public class TraineeController {
     }
 
     @GetMapping("/by-user-id/{userId}/id")
-    public ResponseEntity<GetTraineeIdByUserIdResponse> getTraineeIdByUserId(@PathVariable String userId) {
+    public ResponseEntity<GetTraineeIdByUserIdResponse> getTraineeIdByUserId(@PathVariable("userId") String userId) {
         return ResponseEntity.ok(traineeService.getTraineeIdByUserId(userId));
     }
 

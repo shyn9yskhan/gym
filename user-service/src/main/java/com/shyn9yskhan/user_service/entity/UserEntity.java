@@ -27,24 +27,30 @@ public class UserEntity {
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
+
     public UserEntity() {
     }
 
-    public UserEntity(String id, String firstname, String lastname, String username, String password, boolean isActive) {
+    public UserEntity(String id, String firstname, String lastname, String username, String password, boolean isActive, Role role) {
         this.id = id;
         this.firstname = firstname;
         this.lastname = lastname;
         this.username = username;
         this.password = password;
         this.isActive = isActive;
+        this.role = role;
     }
 
-    public UserEntity(String firstname, String lastname, String username, String password, boolean isActive) {
+    public UserEntity(String firstname, String lastname, String username, String password, boolean isActive, Role role) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.username = username;
         this.password = password;
         this.isActive = isActive;
+        this.role = role;
     }
 
     public String getId() {
@@ -93,5 +99,13 @@ public class UserEntity {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

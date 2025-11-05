@@ -17,7 +17,7 @@ public interface TraineeRepository extends JpaRepository<TraineeEntity, String> 
     List<TraineeEntity> findByIdIn(List<String> ids);
 
     @Query("SELECT t.id FROM TraineeEntity t WHERE t.userId = :userId")
-    Optional<String> findIdByUserId(@Param("traineeId") String userId);
+    Optional<String> findIdByUserId(@Param("userId") String userId);
 
     @Modifying
     @Query("DELETE FROM TraineeEntity t WHERE t.id = :traineeId")

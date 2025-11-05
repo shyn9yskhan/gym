@@ -44,6 +44,30 @@ services:
       - zipkin
     container_name: user-service
 
+  trainee-service:
+    build:
+      context: ./trainee-service
+    ports:
+      - 8081:8080
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+      - service-registry
+    container_name: trainee-service
+
+  trainer-service:
+    build:
+      context: ./trainer-service
+    ports:
+      - 8082:8080
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+      - service-registry
+    container_name: trainer-service
+
   service-registry:
     build:
       context: ./service-registry

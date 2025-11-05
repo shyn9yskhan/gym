@@ -1,6 +1,7 @@
 package com.shyn9yskhan.user_service.service;
 
 import com.shyn9yskhan.user_service.dto.*;
+import com.shyn9yskhan.user_service.entity.Role;
 import com.shyn9yskhan.user_service.entity.UserEntity;
 import com.shyn9yskhan.user_service.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,11 +30,12 @@ public class UserServiceImpl implements UserService {
 
         String firstname = createUserRequest.firstname();
         String lastname = createUserRequest.lastname();
+        Role role = createUserRequest.role();
         String username = makeUniqueUsername(firstname, lastname);
         String password = generatePassword();
         String encodedPassword = passwordEncoder.encode(password);
 
-        UserEntity userEntity = new UserEntity(firstname, lastname, username, encodedPassword, true);
+        UserEntity userEntity = new UserEntity(firstname, lastname, username, encodedPassword, true, role);
         UserEntity saved = userRepository.save(userEntity);
 
         return new CreateUserResponse(saved.getId(), saved.getUsername(), password);
@@ -49,7 +51,8 @@ public class UserServiceImpl implements UserService {
                 userEntity.getLastname(),
                 userEntity.getUsername(),
                 userEntity.getPassword(),
-                userEntity.isActive()
+                userEntity.isActive(),
+                userEntity.getRole()
         );
     }
 
@@ -64,7 +67,8 @@ public class UserServiceImpl implements UserService {
                 userEntity.getLastname(),
                 userEntity.getUsername(),
                 userEntity.getPassword(),
-                userEntity.isActive()
+                userEntity.isActive(),
+                userEntity.getRole()
         );
     }
 
@@ -87,7 +91,8 @@ public class UserServiceImpl implements UserService {
                     userEntity.getLastname(),
                     userEntity.getUsername(),
                     userEntity.getPassword(),
-                    userEntity.isActive()
+                    userEntity.isActive(),
+                    userEntity.getRole()
             ));
         }
         return userDtos;
@@ -104,7 +109,8 @@ public class UserServiceImpl implements UserService {
                     userEntity.getLastname(),
                     userEntity.getUsername(),
                     userEntity.getPassword(),
-                    userEntity.isActive()
+                    userEntity.isActive(),
+                    userEntity.getRole()
             ));
         }
         return userDtos;
@@ -121,7 +127,8 @@ public class UserServiceImpl implements UserService {
                     userEntity.getLastname(),
                     userEntity.getUsername(),
                     userEntity.getPassword(),
-                    userEntity.isActive()
+                    userEntity.isActive(),
+                    userEntity.getRole()
             ));
         }
         return userDtos;

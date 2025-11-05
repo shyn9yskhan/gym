@@ -1,6 +1,7 @@
 package com.shyn9yskhan.user_service.service;
 
 import com.shyn9yskhan.user_service.dto.*;
+import com.shyn9yskhan.user_service.entity.Role;
 import com.shyn9yskhan.user_service.entity.UserEntity;
 import com.shyn9yskhan.user_service.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,10 +38,10 @@ class UserServiceImplTest {
 
     @Test
     void createUser_success_generatesUniqueUsernameAndPassword() {
-        CreateUserRequest req = new CreateUserRequest("John", "Doe");
+        CreateUserRequest req = new CreateUserRequest("John", "Doe", Role.TRAINEE);
         when(userRepository.existsByUsername("John.Doe")).thenReturn(false);
 
-        UserEntity saved = new UserEntity("John", "Doe", "John.Doe", "pw12345678", true);
+        UserEntity saved = new UserEntity("John", "Doe", "John.Doe", "pw12345678", true, Role.TRAINEE);
         saved.setId("id-1");
         when(userRepository.save(any())).thenReturn(saved);
 
@@ -59,11 +60,11 @@ class UserServiceImplTest {
 
     @Test
     void createUser_whenBaseExists_appendsIncrementSuffix() {
-        CreateUserRequest req = new CreateUserRequest("Jane", "Smith");
+        CreateUserRequest req = new CreateUserRequest("Jane", "Smith", Role.TRAINER);
         when(userRepository.existsByUsername("Jane.Smith")).thenReturn(true);
         when(userRepository.findUsernameByUsernameStartingWith("Jane.Smith")).thenReturn(List.of("Jane.Smith", "Jane.Smith1", "Jane.Smith2"));
 
-        UserEntity saved = new UserEntity("Jane", "Smith", "Jane.Smith3", "pw", true);
+        UserEntity saved = new UserEntity("Jane", "Smith", "Jane.Smith3", "pw", true, Role.TRAINER);
         saved.setId("id-2");
         when(userRepository.save(any())).thenReturn(saved);
 
@@ -76,7 +77,7 @@ class UserServiceImplTest {
 
     @Test
     void getUser_success() {
-        UserEntity entity = new UserEntity("A", "B", "a.b", "pass", true);
+        UserEntity entity = new UserEntity("A", "B", "a.b", "pass", true, Role.TRAINEE);
         entity.setId("u-1");
         when(userRepository.findById("u-1")).thenReturn(Optional.of(entity));
 
@@ -96,7 +97,7 @@ class UserServiceImplTest {
 
     @Test
     void getUserByUsername_success() {
-        UserEntity entity = new UserEntity("X", "Y", "x.y", "pw", false);
+        UserEntity entity = new UserEntity("X", "Y", "x.y", "pw", false, Role.TRAINER);
         entity.setId("u-2");
         when(userRepository.findByUsername("x.y")).thenReturn(Optional.of(entity));
 
@@ -115,9 +116,9 @@ class UserServiceImplTest {
 
     @Test
     void getUsersByIds_returnsDtos() {
-        UserEntity e1 = new UserEntity("A", "A", "a.a", "p1", true);
+        UserEntity e1 = new UserEntity("A", "A", "a.a", "p1", true, Role.TRAINEE);
         e1.setId("id1");
-        UserEntity e2 = new UserEntity("B", "B", "b.b", "p2", false);
+        UserEntity e2 = new UserEntity("B", "B", "b.b", "p2", false, Role.TRAINEE);
         e2.setId("id2");
         when(userRepository.findByIdIn(List.of("id1","id2"))).thenReturn(List.of(e1,e2));
 
@@ -128,9 +129,9 @@ class UserServiceImplTest {
 
     @Test
     void getAllActiveUsers_returnsOnlyActive() {
-        UserEntity a = new UserEntity("A", "A", "a.a", "p", true);
+        UserEntity a = new UserEntity("A", "A", "a.a", "p", true, Role.TRAINER);
         a.setId("ida");
-        UserEntity b = new UserEntity("B", "B", "b.b", "p", false);
+        UserEntity b = new UserEntity("B", "B", "b.b", "p", false, Role.TRAINER);
         b.setId("idb");
         when(userRepository.findByIsActiveTrue()).thenReturn(List.of(a));
         var dtos = userService.getAllActiveUsers();
@@ -140,7 +141,7 @@ class UserServiceImplTest {
 
     @Test
     void updateUser_success_changesUsernameAndNames() {
-        UserEntity existing = new UserEntity("Old", "Name", "old.name", "pw", true);
+        UserEntity existing = new UserEntity("Old", "Name", "old.name", "pw", true, Role.TRAINEE);
         existing.setId("u10");
         when(userRepository.findById("u10")).thenReturn(Optional.of(existing));
         when(userRepository.existsByUsername("New.Name")).thenReturn(false);
@@ -157,7 +158,7 @@ class UserServiceImplTest {
 
     @Test
     void updateUserByUsername_success() {
-        UserEntity existing = new UserEntity("First", "Last", "first.last", "pw", true);
+        UserEntity existing = new UserEntity("First", "Last", "first.last", "pw", true, Role.TRAINER);
         existing.setId("ux");
         when(userRepository.findByUsername("first.last")).thenReturn(Optional.of(existing));
         when(userRepository.existsByUsername("New.First")).thenReturn(false);
@@ -178,7 +179,7 @@ class UserServiceImplTest {
 
     @Test
     void deleteUserByUsername_success() {
-        UserEntity e = new UserEntity("A","B","a.b","pw",true);
+        UserEntity e = new UserEntity("A","B","a.b","pw",true, Role.TRAINEE);
         e.setId("del-1");
         when(userRepository.findByUsername("a.b")).thenReturn(Optional.of(e));
         when(userRepository.deleteByUsername("a.b")).thenReturn(1L);
@@ -189,7 +190,7 @@ class UserServiceImplTest {
 
     @Test
     void changePasswordByUsername_successAndFailure() {
-        UserEntity e = new UserEntity("AA","BB","aa.bb","oldpw",true);
+        UserEntity e = new UserEntity("AA","BB","aa.bb","oldpw",true, Role.TRAINER);
         e.setId("p1");
         when(userRepository.findByUsername("aa.bb")).thenReturn(Optional.of(e));
         ChangePasswordRequest good = new ChangePasswordRequest("oldpw","newpw");
@@ -204,7 +205,7 @@ class UserServiceImplTest {
 
     @Test
     void updateUserActiveStatus_success() {
-        UserEntity e = new UserEntity("FN","LN","f.l","pw", true);
+        UserEntity e = new UserEntity("FN","LN","f.l","pw", true, Role.TRAINEE);
         e.setId("act-1");
         when(userRepository.findByUsername("f.l")).thenReturn(Optional.of(e));
         UpdateUserActiveStatusRequest req = new UpdateUserActiveStatusRequest(false);
