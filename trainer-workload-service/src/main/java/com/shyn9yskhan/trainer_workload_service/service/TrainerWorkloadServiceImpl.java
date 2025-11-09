@@ -1,161 +1,95 @@
 package com.shyn9yskhan.trainer_workload_service.service;
 
-import com.shyn9yskhan.trainer_workload_service.domain.WorkloadAction;
+import com.shyn9yskhan.trainer_workload_service.document.TrainerTrainingSummaryDocument;
 import com.shyn9yskhan.trainer_workload_service.domain.MonthSummary;
-import com.shyn9yskhan.trainer_workload_service.dto.TrainerMonthlySummaryResponse;
-import com.shyn9yskhan.trainer_workload_service.domain.YearSummary;
+import com.shyn9yskhan.trainer_workload_service.domain.TrainerTrainingSummary;
+import com.shyn9yskhan.trainer_workload_service.domain.Year;
+import com.shyn9yskhan.trainer_workload_service.dto.TrainerTrainingSummaryDto;
+import com.shyn9yskhan.trainer_workload_service.domain.WorkloadAction;
 import com.shyn9yskhan.trainer_workload_service.dto.WorkloadEventRequest;
-import com.shyn9yskhan.trainer_workload_service.entity.TrainerEntity;
-import com.shyn9yskhan.trainer_workload_service.entity.TrainerMonthSummaryEntity;
-import com.shyn9yskhan.trainer_workload_service.repository.TrainerMonthSummaryRepository;
-import com.shyn9yskhan.trainer_workload_service.repository.TrainerRepository;
+import com.shyn9yskhan.trainer_workload_service.repository.TrainerTrainingSummaryRepository;
+import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TrainerWorkloadServiceImpl implements TrainerWorkloadService {
-    private final TrainerRepository trainerRepository;
-    private final TrainerMonthSummaryRepository trainerMonthSummaryRepository;
+    private final TrainerTrainingSummaryRepository trainerTrainingSummaryRepository;
+    private final DocumentMapper documentMapper;
+    private final DtoMapper dtoMapper;
 
-    public TrainerWorkloadServiceImpl(TrainerRepository trainerRepository, TrainerMonthSummaryRepository trainerMonthSummaryRepository) {
-        this.trainerRepository = trainerRepository;
-        this.trainerMonthSummaryRepository = trainerMonthSummaryRepository;
+    public TrainerWorkloadServiceImpl(TrainerTrainingSummaryRepository trainerTrainingSummaryRepository, DocumentMapper documentMapper, DtoMapper dtoMapper) {
+        this.trainerTrainingSummaryRepository = trainerTrainingSummaryRepository;
+        this.documentMapper = documentMapper;
+        this.dtoMapper = dtoMapper;
     }
 
     @Override
     @Transactional
     public void acceptWorkloadEvent(WorkloadEventRequest workloadEventRequest) {
-        if (workloadEventRequest == null) {return;}
+        String trainerId = workloadEventRequest.trainerId();
+        int year = workloadEventRequest.trainingDate().getYear();
+        int month = workloadEventRequest.trainingDate().getMonthValue();
+        int trainingDuration = workloadEventRequest.trainingDurationMinutes();
+        WorkloadAction workloadAction = workloadEventRequest.action();
 
-        WorkloadAction action = workloadEventRequest.action();
-        String trainerUsername = workloadEventRequest.trainerUsername();
-        LocalDate trainingDate = workloadEventRequest.trainingDate();
-        int trainingDurationMinutes = workloadEventRequest.trainingDurationMinutes();
+        Optional<TrainerTrainingSummaryDocument> optionalTrainerTrainingSummaryDocument = trainerTrainingSummaryRepository.findById(trainerId);
 
-        if (trainerUsername == null || trainerUsername.isBlank() || trainingDate == null) {return;}
+        switch (workloadAction) {
+            case ADD -> {
+                if (optionalTrainerTrainingSummaryDocument.isPresent()) {
+                    TrainerTrainingSummaryDocument trainerTrainingSummaryDocument = optionalTrainerTrainingSummaryDocument.get();
+                    TrainerTrainingSummary trainerTrainingSummary = documentMapper.toDomain(trainerTrainingSummaryDocument);
+                    Year yearDomain = trainerTrainingSummary.getYear(year);
+                    MonthSummary monthSummary = yearDomain.getMonth(month);
+                    monthSummary.addToTrainingsSummaryDuration(trainingDuration);
 
-        int year = trainingDate.getYear();
-        int month = trainingDate.getMonthValue();
+                    TrainerTrainingSummaryDocument updatedTrainerTrainingSummaryDocument = documentMapper.toDocument(trainerTrainingSummary);
+                    trainerTrainingSummaryRepository.save(updatedTrainerTrainingSummaryDocument);
+                }
+                else {
+                    List<Year> years = new ArrayList<>();
+                    Year yearDomain = new Year(year);
+                    MonthSummary monthSummary = new MonthSummary(month, trainingDuration);
+                    yearDomain.addMonth(monthSummary);
+                    years.add(yearDomain);
 
-        upsertTrainerMetadataIfNeeded(trainerUsername,
-                workloadEventRequest.trainerFirstname(),
-                workloadEventRequest.trainerLastname(),
-                workloadEventRequest.isActive());
+                    TrainerTrainingSummary trainerTrainingSummary = new TrainerTrainingSummary(trainerId, years);
 
-        switch (action) {
-            case ADD -> handleAddEvent(trainerUsername, year, month, trainingDurationMinutes);
-            case DELETE -> handleDeleteEvent(trainerUsername, year, month, trainingDurationMinutes);
-            default -> {}
-        }
-    }
-
-    private void upsertTrainerMetadataIfNeeded(String trainerUsername, String firstName, String lastName, boolean isActive) {
-        Optional<TrainerEntity> trainerOpt = trainerRepository.findByTrainerUsername(trainerUsername);
-        if (trainerOpt.isPresent()) {
-            TrainerEntity existing = trainerOpt.get();
-            boolean changed = false;
-            if (firstName != null && !firstName.equals(existing.getTrainerFirstname())) {
-                existing.setTrainerFirstname(firstName);
-                changed = true;
+                    TrainerTrainingSummaryDocument trainerTrainingSummaryDocument = documentMapper.toDocument(trainerTrainingSummary);
+                    trainerTrainingSummaryRepository.save(trainerTrainingSummaryDocument);
+                }
             }
-            if (lastName != null && !lastName.equals(existing.getTrainerLastname())) {
-                existing.setTrainerLastname(lastName);
-                changed = true;
+
+            case DELETE -> {
+                if (optionalTrainerTrainingSummaryDocument.isPresent()) {
+                    TrainerTrainingSummaryDocument trainerTrainingSummaryDocument = optionalTrainerTrainingSummaryDocument.get();
+                    TrainerTrainingSummary trainerTrainingSummary = documentMapper.toDomain(trainerTrainingSummaryDocument);
+                    Year yearDomain = trainerTrainingSummary.getYear(year);
+                    MonthSummary monthSummary = yearDomain.getMonth(month);
+                    monthSummary.removeFromTrainingsSummaryDuration(trainingDuration);
+
+                    TrainerTrainingSummaryDocument updatedTrainerTrainingSummaryDocument = documentMapper.toDocument(trainerTrainingSummary);
+                    trainerTrainingSummaryRepository.save(updatedTrainerTrainingSummaryDocument);
+                }
+                else throw new NotFoundException("Trainer trainings summary not found");
             }
-            if (existing.isActive() != isActive) {
-                existing.setActive(isActive);
-                changed = true;
-            }
-            if (changed) {
-                trainerRepository.save(existing);
-            }
-        } else {
-            TrainerEntity newTrainer = new TrainerEntity(trainerUsername, firstName, lastName, isActive);
-            trainerRepository.save(newTrainer);
-        }
-    }
-
-    private void handleAddEvent(String trainerUsername, int year, int month, int durationMinutes) {
-        Optional<TrainerMonthSummaryEntity> summaryOpt =
-                trainerMonthSummaryRepository.findByTrainerUsernameAndYearAndMonth(trainerUsername, year, month);
-
-        if (summaryOpt.isPresent()) {
-            TrainerMonthSummaryEntity summary = summaryOpt.get();
-            long newTotal = summary.getTotalDurationMinutes() + (long) durationMinutes;
-            summary.setTotalDurationMinutes(newTotal);
-            trainerMonthSummaryRepository.save(summary);
-        } else {
-            TrainerMonthSummaryEntity created = new TrainerMonthSummaryEntity(
-                    trainerUsername,
-                    year,
-                    month,
-                    durationMinutes
-            );
-            trainerMonthSummaryRepository.save(created);
-        }
-    }
-
-    private void handleDeleteEvent(String trainerUsername, int year, int month, int durationMinutes) {
-        Optional<TrainerMonthSummaryEntity> summaryOpt =
-                trainerMonthSummaryRepository.findByTrainerUsernameAndYearAndMonth(trainerUsername, year, month);
-
-        if (summaryOpt.isEmpty()) {
-            return;
-        }
-
-        TrainerMonthSummaryEntity summary = summaryOpt.get();
-        long currentTotal = summary.getTotalDurationMinutes();
-        long newTotal = currentTotal - (long) durationMinutes;
-
-        if (newTotal > 0) {
-            summary.setTotalDurationMinutes(newTotal);
-            trainerMonthSummaryRepository.save(summary);
-        } else {
-            trainerMonthSummaryRepository.delete(summary);
         }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public TrainerMonthlySummaryResponse getTrainerSummary(String username) {
-        if (username == null || username.isBlank()) {
-            return new TrainerMonthlySummaryResponse("", null, null, false, Collections.emptyList());
+    public TrainerTrainingSummaryDto getTrainerSummary(String trainerId) {
+        Optional<TrainerTrainingSummaryDocument> optionalTrainerTrainingSummaryDocument = trainerTrainingSummaryRepository.findById(trainerId);
+        if (optionalTrainerTrainingSummaryDocument.isPresent()) {
+            TrainerTrainingSummaryDocument trainerTrainingSummaryDocument = optionalTrainerTrainingSummaryDocument.get();
+            TrainerTrainingSummary trainerTrainingSummary = documentMapper.toDomain(trainerTrainingSummaryDocument);
+            return dtoMapper.toDto(trainerTrainingSummary);
         }
-
-        Optional<TrainerEntity> trainerOpt = trainerRepository.findByTrainerUsername(username);
-        if (trainerOpt.isEmpty()) {
-            return new TrainerMonthlySummaryResponse(username, null, null, false, Collections.emptyList());
-        }
-
-        TrainerEntity trainer = trainerOpt.get();
-
-        List<TrainerMonthSummaryEntity> monthRows = trainerMonthSummaryRepository.findByTrainerUsername(username);
-
-        Map<Integer, List<TrainerMonthSummaryEntity>> groupedByYear = monthRows.stream()
-                .collect(Collectors.groupingBy(TrainerMonthSummaryEntity::getYear));
-
-        List<YearSummary> years = groupedByYear.entrySet().stream()
-                .map(entry -> {
-                    int year = entry.getKey();
-                    List<MonthSummary> months = entry.getValue().stream()
-                            .sorted(Comparator.comparingInt(TrainerMonthSummaryEntity::getMonth))
-                            .map(e -> new MonthSummary(e.getMonth(), (int) e.getTotalDurationMinutes()))
-                            .collect(Collectors.toList());
-                    return new YearSummary(year, months);
-                })
-                .sorted(Comparator.comparingInt(YearSummary::year))
-                .collect(Collectors.toList());
-
-        return new TrainerMonthlySummaryResponse(
-                trainer.getTrainerUsername(),
-                trainer.getTrainerFirstname(),
-                trainer.getTrainerLastname(),
-                trainer.isActive(),
-                years
-        );
+        else throw new NotFoundException("Trainer trainings summary not found");
     }
 }

@@ -2,8 +2,10 @@ package com.shyn9yskhan.trainer_workload_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @SpringBootApplication
+@EnableMongoRepositories
 public class TrainerWorkloadServiceApplication {
 
 	public static void main(String[] args) {

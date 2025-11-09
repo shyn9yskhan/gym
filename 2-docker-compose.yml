@@ -1,0 +1,106 @@
+version: "3.8"
+
+services:
+  gateway:
+    build:
+      context: ./gateway
+    ports:
+      - 9999:9999
+    networks:
+      - app-network
+    depends_on:
+      - service-registry
+      - authentication-service
+    container_name: gateway
+
+  authentication-service:
+    build:
+      context: ./authentication-service
+    ports:
+      - 9000:9000
+    networks:
+      - app-network
+    volumes:
+      - ./authentication-service/private_key.pem:/app/private_key.pem:ro
+      - ./authentication-service/public_key.pem:/app/public_key.pem:ro
+    environment:
+      - JWT_PRIVATE_KEY_PATH=/app/private_key.pem
+      - JWT_PUBLIC_KEY_PATH=/app/public_key.pem
+    depends_on:
+      - service-registry
+      - user-service
+    container_name: authentication-service
+
+  user-service:
+    build:
+      context: ./user-service
+    ports:
+      - 8085:8080
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+      - service-registry
+      - zipkin
+    container_name: user-service
+
+  trainee-service:
+    build:
+      context: ./trainee-service
+    ports:
+      - 8081:8080
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+      - service-registry
+    container_name: trainee-service
+
+  trainer-service:
+    build:
+      context: ./trainer-service
+    ports:
+      - 8082:8080
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+      - service-registry
+    container_name: trainer-service
+
+  service-registry:
+    build:
+      context: ./service-registry
+    ports:
+      - 8761:8761
+    networks:
+      - app-network
+    container_name: service-registry
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sql001
+    ports:
+      - 5432:5432
+    networks:
+      - app-network
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    container_name: postgres
+
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
+    networks:
+      - app-network
+    container_name: zipkin
+
+networks:
+  app-network:
+
+volumes:
+  postgres-data:
