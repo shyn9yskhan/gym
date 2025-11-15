@@ -40,7 +40,10 @@ public class DocumentMapper {
     public Year yearToDomain(YearDocument yearDocument) {
         Year year = new Year(yearDocument.getYear());
         for (MonthSummaryDocument monthSummaryDocument : yearDocument.getMonths()) {
-            year.addMonth(monthToDomain(monthSummaryDocument));
+            year.addToMonth(
+                    monthSummaryDocument.getMonth(),
+                    monthSummaryDocument.getTrainingsSummaryDuration()
+            );
         }
         return year;
     }
@@ -51,9 +54,7 @@ public class DocumentMapper {
 
         List<MonthSummaryDocument> monthSummaryDocuments = new ArrayList<>();
         for (MonthSummary monthSummary : year.getMonths()) {
-            if (monthSummary != null) {
-                monthSummaryDocuments.add(monthToDocument(monthSummary));
-            }
+            monthSummaryDocuments.add(monthToDocument(monthSummary));
         }
 
         yearDocument.setMonths(monthSummaryDocuments);

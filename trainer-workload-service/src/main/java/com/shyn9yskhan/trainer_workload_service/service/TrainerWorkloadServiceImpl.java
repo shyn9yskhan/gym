@@ -44,9 +44,13 @@ public class TrainerWorkloadServiceImpl implements TrainerWorkloadService {
                 if (optionalTrainerTrainingSummaryDocument.isPresent()) {
                     TrainerTrainingSummaryDocument trainerTrainingSummaryDocument = optionalTrainerTrainingSummaryDocument.get();
                     TrainerTrainingSummary trainerTrainingSummary = documentMapper.toDomain(trainerTrainingSummaryDocument);
+
                     Year yearDomain = trainerTrainingSummary.getYear(year);
-                    MonthSummary monthSummary = yearDomain.getMonth(month);
-                    monthSummary.addToTrainingsSummaryDuration(trainingDuration);
+                    if (yearDomain == null) {
+                        yearDomain = new Year(year);
+                        trainerTrainingSummary.addYear(yearDomain);
+                    }
+                    yearDomain.addToMonth(month, trainingDuration);
 
                     TrainerTrainingSummaryDocument updatedTrainerTrainingSummaryDocument = documentMapper.toDocument(trainerTrainingSummary);
                     trainerTrainingSummaryRepository.save(updatedTrainerTrainingSummaryDocument);
@@ -54,10 +58,8 @@ public class TrainerWorkloadServiceImpl implements TrainerWorkloadService {
                 else {
                     List<Year> years = new ArrayList<>();
                     Year yearDomain = new Year(year);
-                    MonthSummary monthSummary = new MonthSummary(month, trainingDuration);
-                    yearDomain.addMonth(monthSummary);
+                    yearDomain.addToMonth(month, trainingDuration);
                     years.add(yearDomain);
-
                     TrainerTrainingSummary trainerTrainingSummary = new TrainerTrainingSummary(trainerId, years);
 
                     TrainerTrainingSummaryDocument trainerTrainingSummaryDocument = documentMapper.toDocument(trainerTrainingSummary);
@@ -69,9 +71,9 @@ public class TrainerWorkloadServiceImpl implements TrainerWorkloadService {
                 if (optionalTrainerTrainingSummaryDocument.isPresent()) {
                     TrainerTrainingSummaryDocument trainerTrainingSummaryDocument = optionalTrainerTrainingSummaryDocument.get();
                     TrainerTrainingSummary trainerTrainingSummary = documentMapper.toDomain(trainerTrainingSummaryDocument);
+
                     Year yearDomain = trainerTrainingSummary.getYear(year);
-                    MonthSummary monthSummary = yearDomain.getMonth(month);
-                    monthSummary.removeFromTrainingsSummaryDuration(trainingDuration);
+                    yearDomain.removeFromMonth(month, trainingDuration);
 
                     TrainerTrainingSummaryDocument updatedTrainerTrainingSummaryDocument = documentMapper.toDocument(trainerTrainingSummary);
                     trainerTrainingSummaryRepository.save(updatedTrainerTrainingSummaryDocument);

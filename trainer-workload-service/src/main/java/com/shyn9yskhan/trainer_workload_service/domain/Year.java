@@ -9,8 +9,8 @@ public class Year {
 
     private List<MonthSummary> initializeMonths() {
         List<MonthSummary> months = new ArrayList<>(12);
-        for (int i = 0; i < 12; i++) {
-            months.add(null);
+        for (int i = 1; i <= 12; i++) {
+            months.add(new MonthSummary(i,0));
         }
         return months;
     }
@@ -19,6 +19,7 @@ public class Year {
     }
 
     public Year(int year) {
+        validateYear(year);
         this.year = year;
         this.months = initializeMonths();
     }
@@ -28,6 +29,7 @@ public class Year {
     }
 
     public void setYear(int year) {
+        validateYear(year);
         this.year = year;
     }
 
@@ -35,37 +37,27 @@ public class Year {
         return months;
     }
 
-    public void addMonth(MonthSummary monthSummary) {
-        if (months == null) throw new IllegalArgumentException("MonthSummary cannot be null");
-        int index = getIndexOfMonth(monthSummary);
-        MonthSummary existing = months.get(index);
-        if (existing != null) {
-            if (existing.getMonth() == monthSummary.getMonth()) {
-                throw new IllegalStateException(
-                        String.format("Month %d already exists in year %d",
-                                monthSummary.getMonth(), year)
-                );
-            }
-        }
-        months.set(index, monthSummary);
+    public void addToMonth(int month, int duration) {
+        int index = getIndexOfMonth(month);
+        MonthSummary monthSummary = months.get(index);
+        monthSummary.addToTrainingsSummaryDuration(duration);
     }
 
-    public void removeMonth(int month) {
-        validateMonthNumber(month);
-        int index = month - 1;
-        months.set(index, null);
+    public void removeFromMonth(int month, int duration) {
+        int index = getIndexOfMonth(month);
+        MonthSummary monthSummary = months.get(index);
+        monthSummary.removeFromTrainingsSummaryDuration(duration);
     }
 
     public MonthSummary getMonth(int month) {
-        validateMonthNumber(month);
-        int index = month - 1;
+        int index = getIndexOfMonth(month);
         return months.get(index);
     }
 
-    private int getIndexOfMonth(MonthSummary monthSummary) {
-        if (monthSummary == null) throw new IllegalArgumentException("MonthSummary cannot be null");
-        int month = monthSummary.getMonth();
-        validateMonthNumber(month);
+    private int getIndexOfMonth(int month) {
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("Invalid month");
+        }
         return month - 1;
     }
 
@@ -75,11 +67,5 @@ public class Year {
                     String.format("Year must be between 1900 and 2100, got: %d", year)
             );
         }
-    }
-
-    private void validateMonthNumber(int month) {
-        if (month < 1 || month > 12) throw new IllegalArgumentException(
-                String.format("Month must be between 1 and 12, got: %d", month)
-        );
     }
 }
