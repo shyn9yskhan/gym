@@ -1,6 +1,30 @@
-version: "3.8"
-
 services:
+  gateway:
+    build:
+      context: ./gateway
+    ports:
+      - 9999:9999
+    networks:
+      - app-network
+    depends_on:
+      - service-registry
+      - authentication-service
+    container_name: gateway
+
+  authentication-service:
+    build:
+      context: ./authentication-service
+    ports:
+      - 9000:9000
+    networks:
+      - app-network
+    depends_on:
+      - service-registry
+      - user-service
+      - trainer-service
+      - trainee-service
+    container_name: authentication-service
+
   trainee-service:
     build:
       context: ./trainee-service
@@ -88,6 +112,33 @@ services:
       - trainee-trainer-relationship-service
     container_name: user-orchestration-service
 
+  training-orchestration-service:
+    build:
+      context: ./training-orchestration-service
+    ports:
+      - 8088:8080
+    networks:
+      - app-network
+    depends_on:
+      - service-registry
+      - training-service
+      - training-type-service
+      - trainee-service
+      - trainer-service
+      - user-service
+    container_name: training-orchestration-service
+
+  trainer-workload-service:
+    build:
+      context: ./trainer-workload-service
+    ports:
+      - 8089:8080
+    networks:
+      - app-network
+    depends_on:
+      - mongo
+    container_name: trainer-workload-service
+
   service-registry:
     build:
       context: ./service-registry
@@ -111,8 +162,19 @@ services:
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     container_name: postgres
 
+  mongo:
+    image: mongo
+    ports:
+      - 27017:27017
+    networks:
+      app-network:
+    volumes:
+      - mongo-data:/data/db
+    container_name: mongo
+
 networks:
   app-network:
 
 volumes:
   postgres-data:
+  mongo-data:

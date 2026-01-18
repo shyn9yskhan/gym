@@ -2,28 +2,16 @@ package com.shyn9yskhan.user_orchestration_service.client.dto.trainee;
 
 import java.time.LocalDate;
 
-public class GetTraineeByUserIdServiceResponse {
-    private String id;
+public class GetTraineeServiceResponse {
     private LocalDate dateOfBirth;
     private String address;
-    private String userId;
 
-    public GetTraineeByUserIdServiceResponse() {
+    public GetTraineeServiceResponse() {
     }
 
-    public GetTraineeByUserIdServiceResponse(String id, LocalDate dateOfBirth, String address, String userId) {
-        this.id = id;
+    public GetTraineeServiceResponse(LocalDate dateOfBirth, String address) {
         this.dateOfBirth = dateOfBirth;
         this.address = address;
-        this.userId = userId;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public LocalDate getDateOfBirth() {
@@ -40,13 +28,5 @@ public class GetTraineeByUserIdServiceResponse {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 }

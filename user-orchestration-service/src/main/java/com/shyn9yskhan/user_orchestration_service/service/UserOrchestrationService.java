@@ -8,15 +8,15 @@ import com.shyn9yskhan.user_orchestration_service.dto.trainer.*;
 
 public interface UserOrchestrationService {
     CreateTraineeResponse createTrainee(CreateTraineeRequest createTraineeRequest);
-    GetTraineeProfileResponse getTraineeProfile(String username);
-    UpdateTraineeProfileResponse updateTraineeProfile(UpdateTraineeProfileRequest updateTraineeProfileRequest);
-    void deleteTrainee(String username);
+    GetTraineeProfileResponse getTraineeProfile(String userId, String traineeId);
+    UpdateTraineeProfileResponse updateTraineeProfile(String userId, String traineeId, UpdateTraineeProfileRequest updateTraineeProfileRequest);
+    void deleteTrainee(String userId, String traineeId);
 
     CreateTrainerResponse createTrainer(CreateTrainerRequest createTrainerRequest);
-    GetTrainerProfileResponse getTrainerProfile(String username);
-    UpdateTrainerProfileResponse updateTrainerProfile(UpdateTrainerProfileRequest updateTrainerProfileRequest);
-    void deleteTrainer(String username);
+    GetTrainerProfileResponse getTrainerProfile(String userId, String trainerId);
+    UpdateTrainerProfileResponse updateTrainerProfile(String userId, String trainerId, UpdateTrainerProfileRequest updateTrainerProfileRequest);
+    void deleteTrainer(String userId, String trainerId);
 
-    GetNotAssignedOnTraineeActiveTrainersResponse getNotAssignedOnTraineeActiveTrainers(String username);
-    UpdateTraineesTrainerListResponse updateTraineesTrainerList(String username, UpdateTraineesTrainerListRequest updateTraineesTrainerListRequest);
+    GetNotAssignedOnTraineeActiveTrainersResponse getNotAssignedOnTraineeActiveTrainers(String userId, String traineeId);
+    UpdateTraineesTrainerListResponse updateTraineesTrainerList(String traineeId, UpdateTraineesTrainerListRequest updateTraineesTrainerListRequest);
 }

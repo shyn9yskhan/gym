@@ -6,7 +6,6 @@ import com.shyn9yskhan.training_orchestration_service.client.TrainingServiceClie
 import com.shyn9yskhan.training_orchestration_service.client.UserServiceClient;
 import com.shyn9yskhan.training_orchestration_service.client.dto.*;
 import com.shyn9yskhan.training_orchestration_service.dto.*;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -30,18 +29,7 @@ public class TrainingOrchestrationServiceImpl implements TrainingOrchestrationSe
     }
 
     @Override
-    @CircuitBreaker(name = "trainingServiceClient", fallbackMethod = "getTraineeTrainingsListFallback")
-    public GetTraineeTrainingsListResponse getTraineeTrainingsList(GetTraineeTrainingsListRequest request) {
-        String username = request.username();
-        GetUserIdByUsernameServiceResponse userIdResponse = userServiceClient.getUserIdByUsername(username).getBody();
-        if (userIdResponse == null) return new GetTraineeTrainingsListResponse(Collections.emptyList());
-        String userId = userIdResponse.userId();
-
-        GetTraineeIdByUserIdServiceResponse traineeIdResponse = traineeServiceClient.getTraineeIdByUserId(userId).getBody();
-        if (traineeIdResponse == null) return new GetTraineeTrainingsListResponse(Collections.emptyList());
-
-        String traineeId = traineeIdResponse.traineeId();
-
+    public GetTraineeTrainingsListResponse getTraineeTrainingsList(String traineeId, GetTraineeTrainingsListRequest request) {
         GetTraineeTrainingsServiceResponse trainingsResponse = trainingServiceClient.getTrainingsByTraineeId(traineeId).getBody();
 
         List<TrainingDto> trainingsList = (trainingsResponse == null || trainingsResponse.trainings() == null)
@@ -68,17 +56,7 @@ public class TrainingOrchestrationServiceImpl implements TrainingOrchestrationSe
     }
 
     @Override
-    @CircuitBreaker(name = "trainingServiceClient", fallbackMethod = "getTrainerTrainingsListFallback")
-    public GetTrainerTrainingsListResponse getTrainerTrainingsList(GetTrainerTrainingsListRequest request) {
-        String username = request.username();
-        GetUserIdByUsernameServiceResponse userIdResponse = userServiceClient.getUserIdByUsername(username).getBody();
-        if (userIdResponse == null) return new GetTrainerTrainingsListResponse(Collections.emptyList());
-        String userId = userIdResponse.userId();
-
-        GetTrainerIdByUserIdServiceResponse trainerIdResponse = trainerServiceClient.getTrainerIdByUserId(userId).getBody();
-        if (trainerIdResponse == null) return new GetTrainerTrainingsListResponse(Collections.emptyList());
-        String trainerId = trainerIdResponse.trainerId();
-
+    public GetTrainerTrainingsListResponse getTrainerTrainingsList(String trainerId, GetTrainerTrainingsListRequest request) {
         GetTrainerTrainingsServiceResponse trainingsResponse = trainingServiceClient.getTrainingsByTrainerId(trainerId).getBody();
 
         List<TrainingDto> allTrainings = (trainingsResponse == null || trainingsResponse.trainings() == null)
@@ -126,13 +104,5 @@ public class TrainingOrchestrationServiceImpl implements TrainingOrchestrationSe
                 addTrainingRequest.duration()
         );
         trainingServiceClient.createTraining(createTrainingServiceRequest);
-    }
-
-    public GetTraineeTrainingsListResponse getTraineeTrainingsListFallback(GetTraineeTrainingsListRequest request, Throwable exception) {
-        return new GetTraineeTrainingsListResponse(Collections.emptyList());
-    }
-
-    public GetTrainerTrainingsListResponse getTrainerTrainingsListFallback(GetTrainerTrainingsListRequest getTrainerTrainingsListRequest, Throwable exception) {
-        return new GetTrainerTrainingsListResponse(Collections.emptyList());
     }
 }

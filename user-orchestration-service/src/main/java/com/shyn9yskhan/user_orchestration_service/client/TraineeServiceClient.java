@@ -12,15 +12,15 @@ public interface TraineeServiceClient {
     @PostMapping("/trainee")
     ResponseEntity<CreateTraineeServiceResponse> createTrainee(@RequestBody CreateTraineeServiceRequest createTraineeServiceRequest);
 
-    @GetMapping("/trainee/by-user-id/{userId}")
-    ResponseEntity<GetTraineeByUserIdServiceResponse> getTraineeByUserId(@PathVariable String userId);
+    @GetMapping("/trainee/{traineeId}")
+    ResponseEntity<GetTraineeServiceResponse> getTrainee(@PathVariable String traineeId);
 
-    @PutMapping("/trainee/by-user-id/{userId}")
-    ResponseEntity<UpdateTraineeByUserIdServiceResponse> updateTraineeByUserId(@PathVariable String userId, @RequestBody UpdateTraineeServiceRequest updateTraineeRequest);
+    @PutMapping("/trainee/{traineeId}")
+    ResponseEntity<UpdateTraineeServiceResponse> updateTrainee(@PathVariable String traineeId, @RequestBody UpdateTraineeServiceRequest updateTraineeRequest);
 
-    @DeleteMapping("/trainee/by-user-id/{userId}")
-    ResponseEntity<Void> deleteTraineeByUserId(@PathVariable String userId);
+    @DeleteMapping("/trainee/{traineeId}")
+    ResponseEntity<Void> deleteTrainee(@PathVariable String traineeId);
 
-    @GetMapping
+    @GetMapping("/trainee")
     ResponseEntity<List<GetTraineeByIdResponse>> getTraineesByIds(@RequestParam List<String> traineeIds);
 }

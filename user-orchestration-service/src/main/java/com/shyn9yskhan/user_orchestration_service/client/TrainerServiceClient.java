@@ -10,21 +10,21 @@ import java.util.List;
 @FeignClient(name = "TRAINER-SERVICE")
 public interface TrainerServiceClient {
 
-    @PostMapping
+    @PostMapping("/trainer")
     ResponseEntity<CreateTrainerServiceResponse> createTrainer(@RequestBody CreateTrainerServiceRequest createTrainerServiceRequest);
 
-    @GetMapping("/by-user-id/{userId}")
-    ResponseEntity<TrainerServiceDto> getTrainerByUserId(@PathVariable String userId);
+    @GetMapping("/trainer/{trainerId}")
+    ResponseEntity<GetTrainerServiceResponse> getTrainer(@PathVariable String trainerId);
 
-    @GetMapping("/trainer")
+    @GetMapping("/trainer/by-ids")
     ResponseEntity<List<TrainerServiceDto>> getTrainersByIds(@RequestParam List<String> trainerIds);
 
-    @GetMapping
+    @GetMapping("/trainer/by-user-ids")
     ResponseEntity<List<TrainerServiceDto>> getTrainersByUserIds(@RequestParam List<String> userIds);
 
-    @PutMapping("/by-user-id/{userId}")
-    ResponseEntity<UpdateTrainerByUserIdServiceResponse> updateTrainerByUserId(@PathVariable String userId, @RequestBody UpdateTrainerServiceRequest updateTrainerServiceRequest);
+    @PutMapping("/trainer/{trainerId}")
+    ResponseEntity<UpdateTrainerServiceResponse> updateTrainer(@PathVariable String trainerId, @RequestBody UpdateTrainerServiceRequest updateTrainerRequest);
 
-    @DeleteMapping("/by-user-id/{userId}")
-    ResponseEntity<Void> deleteTrainerByUserId(@PathVariable String userId);
+    @DeleteMapping("/trainer/{trainerId}")
+    ResponseEntity<Void> deleteTrainer(@PathVariable String trainerId);
 }

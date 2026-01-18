@@ -1,31 +1,23 @@
 package com.shyn9yskhan.user_orchestration_service.client.dto.user;
 
 public class GetUserServiceResponse {
-    private String id;
     private String firstname;
     private String lastname;
     private String username;
     private String password;
     private boolean isActive;
+    private Role role;
 
     public GetUserServiceResponse() {
     }
 
-    public GetUserServiceResponse(String id, String firstname, String lastname, String username, String password, boolean isActive) {
-        this.id = id;
+    public GetUserServiceResponse(String firstname, String lastname, String username, String password, boolean isActive, Role role) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.username = username;
         this.password = password;
         this.isActive = isActive;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+        this.role = role;
     }
 
     public String getFirstname() {
@@ -66,5 +58,13 @@ public class GetUserServiceResponse {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

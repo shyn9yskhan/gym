@@ -13,9 +13,11 @@ import java.util.stream.Collectors;
 @Service
 public class TrainingServiceImpl implements TrainingService {
     private final TrainingRepository trainingRepository;
+    private final MessageSender messageSender;
 
-    public TrainingServiceImpl(TrainingRepository trainingRepository) {
+    public TrainingServiceImpl(TrainingRepository trainingRepository, MessageSender messageSender) {
         this.trainingRepository = trainingRepository;
+        this.messageSender = messageSender;
     }
 
     @Override
@@ -33,6 +35,14 @@ public class TrainingServiceImpl implements TrainingService {
         );
 
         TrainingEntity saved = trainingRepository.save(trainingEntity);
+        messageSender.sendTrainingUpdate(
+                new TrainingEvent(
+                        saved.getTrainerId(),
+                        saved.getDate(),
+                        saved.getDuration(),
+                        WorkloadAction.ADD
+                )
+        );
         return new CreateTrainingResponse(
                 saved.getId(),
                 saved.getTraineeId(),
@@ -90,7 +100,15 @@ public class TrainingServiceImpl implements TrainingService {
         if (!trainingRepository.existsById(trainingId)) {
             throw new EntityNotFoundException("Training not found with ID: " + trainingId);
         }
+        GetTrainingResponse getTrainingResponse = getTraining(trainingId);
+        TrainingEvent trainingEvent = new TrainingEvent(
+                getTrainingResponse.trainerId(),
+                getTrainingResponse.date(),
+                getTrainingResponse.duration(),
+                WorkloadAction.DELETE
+        );
         trainingRepository.deleteById(trainingId);
+        messageSender.sendTrainingUpdate(trainingEvent);
     }
 
     @Override

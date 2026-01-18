@@ -2,26 +2,16 @@ package com.shyn9yskhan.user_orchestration_service.client.dto.trainee;
 
 import java.time.LocalDate;
 
-public class UpdateTraineeByUserIdServiceResponse {
-    private String traineeId;
+public class UpdateTraineeServiceResponse {
     private LocalDate dateOfBirth;
     private String address;
 
-    public UpdateTraineeByUserIdServiceResponse() {
+    public UpdateTraineeServiceResponse() {
     }
 
-    public UpdateTraineeByUserIdServiceResponse(String traineeId, LocalDate dateOfBirth, String address) {
-        this.traineeId = traineeId;
+    public UpdateTraineeServiceResponse(LocalDate dateOfBirth, String address) {
         this.dateOfBirth = dateOfBirth;
         this.address = address;
-    }
-
-    public String getTraineeId() {
-        return traineeId;
-    }
-
-    public void setTraineeId(String traineeId) {
-        this.traineeId = traineeId;
     }
 
     public LocalDate getDateOfBirth() {

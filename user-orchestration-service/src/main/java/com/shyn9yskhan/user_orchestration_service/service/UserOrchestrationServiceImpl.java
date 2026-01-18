@@ -49,43 +49,37 @@ public class UserOrchestrationServiceImpl implements UserOrchestrationService {
     }
 
     @Override
-    public GetTraineeProfileResponse getTraineeProfile(String username) {
-        GetUserServiceResponse getUserServiceResponse = userServiceClient.getUserByUsername(username).getBody();
-        String userId = getUserServiceResponse.getId();
-
-        GetTraineeByUserIdServiceResponse getTraineeByUserIdServiceResponse = traineeServiceClient.getTraineeByUserId(userId).getBody();
-        String traineeId = getTraineeByUserIdServiceResponse.getId();
+    public GetTraineeProfileResponse getTraineeProfile(String userId, String traineeId) {
+        GetUserServiceResponse getUserServiceResponse = userServiceClient.getUser(userId).getBody();
+        GetTraineeServiceResponse getTraineeServiceResponse = traineeServiceClient.getTrainee(traineeId).getBody();
 
         List<String> trainerIds = traineeTrainerRelationshipServiceClient.getTrainersForTrainee(traineeId).getBody();
-        List<TrainerServiceDto> trainerByIdRespons = trainerServiceClient.getTrainersByIds(trainerIds).getBody();
+        List<TrainerServiceDto> trainersByIdResponse = trainerServiceClient.getTrainersByIds(trainerIds).getBody();
 
         List<String> userIds = new ArrayList<>();
-        for (TrainerServiceDto trainerServiceDto : trainerByIdRespons) {
+        for (TrainerServiceDto trainerServiceDto : trainersByIdResponse) {
             userIds.add(trainerServiceDto.getUserId());
         }
 
         List<UserDto> userByIdServiceResponses = userServiceClient.getUsersByIds(userIds).getBody();
 
-        return RequestSplitterMerger.mergeResponsesToGetTraineeProfileResponse(getUserServiceResponse, getTraineeByUserIdServiceResponse, trainerByIdRespons, userByIdServiceResponses);
+        return RequestSplitterMerger.mergeResponsesToGetTraineeProfileResponse(getUserServiceResponse, getTraineeServiceResponse, trainersByIdResponse, userByIdServiceResponses);
     }
 
     @Override
-    public UpdateTraineeProfileResponse updateTraineeProfile(UpdateTraineeProfileRequest updateTraineeProfileRequest) {
+    public UpdateTraineeProfileResponse updateTraineeProfile(String userId, String traineeId, UpdateTraineeProfileRequest updateTraineeProfileRequest) {
         UpdateUserServiceRequest updateUserServiceRequest = new UpdateUserServiceRequest();
         UpdateTraineeServiceRequest updateTraineeServiceRequest = new UpdateTraineeServiceRequest();
 
         RequestSplitterMerger.splitUpdateTraineeProfileRequest(updateTraineeProfileRequest, updateUserServiceRequest, updateTraineeServiceRequest);
 
-        UpdateUserByUsernameServiceResponse updateUserByUsernameServiceResponse = userServiceClient.updateUserByUsername(updateTraineeProfileRequest.username(), updateUserServiceRequest).getBody();
-        String userId = updateUserByUsernameServiceResponse.getId();
-        String username = updateUserByUsernameServiceResponse.getUsername();
+        UpdateUserServiceResponse updateUserServiceResponse = userServiceClient.updateUser(userId, updateUserServiceRequest).getBody();
+        UpdateTraineeServiceResponse updateTraineeServiceResponse = traineeServiceClient.updateTrainee(traineeId, updateTraineeServiceRequest).getBody();
 
-        UpdateTraineeByUserIdServiceResponse updateTraineeByUserIdServiceResponse = traineeServiceClient.updateTraineeByUserId(userId, updateTraineeServiceRequest).getBody();
-
-        GetTraineeProfileResponse getTraineeProfileResponse = getTraineeProfile(username);
+        GetTraineeProfileResponse getTraineeProfileResponse = getTraineeProfile(userId, traineeId);
 
         return new UpdateTraineeProfileResponse(
-                username,
+                updateUserServiceResponse.getUsername(),
                 getTraineeProfileResponse.firstname(),
                 getTraineeProfileResponse.lastname(),
                 getTraineeProfileResponse.dateOfBirth(),
@@ -96,10 +90,9 @@ public class UserOrchestrationServiceImpl implements UserOrchestrationService {
     }
 
     @Override
-    public void deleteTrainee(String username) {
-        DeleteUserByUsernameServiceResponse deleteUserByUsernameServiceResponse = userServiceClient.deleteUserByUsername(username).getBody();
-        String userId = deleteUserByUsernameServiceResponse.getId();
-        traineeServiceClient.deleteTraineeByUserId(userId);
+    public void deleteTrainee(String userId, String traineeId) {
+        userServiceClient.deleteUser(userId);
+        traineeServiceClient.deleteTrainee(traineeId);
     }
 
     @Override
@@ -111,6 +104,7 @@ public class UserOrchestrationServiceImpl implements UserOrchestrationService {
 
         CreateUserServiceResponse createUserServiceResponse = userServiceClient.createUser(createUserServiceRequest).getBody();
         String userId = createUserServiceResponse.getUserId();
+        createTrainerServiceRequest.setUserId(userId);
 
         CreateTrainerServiceResponse createTrainerServiceResponse = trainerServiceClient.createTrainer(createTrainerServiceRequest).getBody();
 
@@ -118,12 +112,9 @@ public class UserOrchestrationServiceImpl implements UserOrchestrationService {
     }
 
     @Override
-    public GetTrainerProfileResponse getTrainerProfile(String username) {
-        GetUserServiceResponse getUserServiceResponse = userServiceClient.getUserByUsername(username).getBody();
-        String userId = getUserServiceResponse.getId();
-
-        TrainerServiceDto getTrainerByUserIdServiceResponse = trainerServiceClient.getTrainerByUserId(userId).getBody();
-        String trainerId = getTrainerByUserIdServiceResponse.getId();
+    public GetTrainerProfileResponse getTrainerProfile(String userId, String trainerId) {
+        GetUserServiceResponse getUserServiceResponse = userServiceClient.getUser(userId).getBody();
+        GetTrainerServiceResponse getTrainerServiceResponse = trainerServiceClient.getTrainer(trainerId).getBody();
 
         List<String> traineeIds = traineeTrainerRelationshipServiceClient.getTraineesForTrainer(trainerId).getBody();
         List<GetTraineeByIdResponse> getTraineeByIdResponses = traineeServiceClient.getTraineesByIds(traineeIds).getBody();
@@ -135,26 +126,23 @@ public class UserOrchestrationServiceImpl implements UserOrchestrationService {
 
         List<UserDto> userByIdServiceResponses = userServiceClient.getUsersByIds(userIds).getBody();
 
-        return RequestSplitterMerger.mergeResponsesToGetTrainerProfileResponse(getUserServiceResponse, getTrainerByUserIdServiceResponse, getTraineeByIdResponses, userByIdServiceResponses);
+        return RequestSplitterMerger.mergeResponsesToGetTrainerProfileResponse(getUserServiceResponse, getTrainerServiceResponse, getTraineeByIdResponses, userByIdServiceResponses);
     }
 
     @Override
-    public UpdateTrainerProfileResponse updateTrainerProfile(UpdateTrainerProfileRequest updateTrainerProfileRequest) {
+    public UpdateTrainerProfileResponse updateTrainerProfile(String userId, String trainerId, UpdateTrainerProfileRequest updateTrainerProfileRequest) {
         UpdateUserServiceRequest updateUserServiceRequest = new UpdateUserServiceRequest();
         UpdateTrainerServiceRequest updateTrainerServiceRequest = new UpdateTrainerServiceRequest();
 
         RequestSplitterMerger.splitUpdateTrainerProfileRequest(updateTrainerProfileRequest, updateUserServiceRequest, updateTrainerServiceRequest);
 
-        UpdateUserByUsernameServiceResponse updateUserByUsernameServiceResponse = userServiceClient.updateUserByUsername(updateTrainerProfileRequest.username(), updateUserServiceRequest).getBody();
-        String userId = updateUserByUsernameServiceResponse.getId();
-        String username = updateUserByUsernameServiceResponse.getUsername();
+        UpdateUserServiceResponse updateUserServiceResponse = userServiceClient.updateUser(userId, updateUserServiceRequest).getBody();
+        UpdateTrainerServiceResponse updateTrainerServiceResponse = trainerServiceClient.updateTrainer(trainerId, updateTrainerServiceRequest).getBody();
 
-        UpdateTrainerByUserIdServiceResponse updateTrainerByUserIdServiceResponse = trainerServiceClient.updateTrainerByUserId(userId, updateTrainerServiceRequest).getBody();
-
-        GetTrainerProfileResponse getTrainerProfileResponse = getTrainerProfile(username);
+        GetTrainerProfileResponse getTrainerProfileResponse = getTrainerProfile(userId, trainerId);
 
         return new UpdateTrainerProfileResponse(
-                username,
+                updateUserServiceResponse.getUsername(),
                 getTrainerProfileResponse.firstname(),
                 getTrainerProfileResponse.lastname(),
                 getTrainerProfileResponse.trainingTypeId(),
@@ -164,14 +152,13 @@ public class UserOrchestrationServiceImpl implements UserOrchestrationService {
     }
 
     @Override
-    public void deleteTrainer(String username) {
-        DeleteUserByUsernameServiceResponse deleteUserByUsernameServiceResponse = userServiceClient.deleteUserByUsername(username).getBody();
-        String userId = deleteUserByUsernameServiceResponse.getId();
-        trainerServiceClient.deleteTrainerByUserId(userId);
+    public void deleteTrainer(String userId, String trainerId) {
+        userServiceClient.deleteUser(userId);
+        trainerServiceClient.deleteTrainer(trainerId);
     }
 
     @Override
-    public GetNotAssignedOnTraineeActiveTrainersResponse getNotAssignedOnTraineeActiveTrainers(String username) {
+    public GetNotAssignedOnTraineeActiveTrainersResponse getNotAssignedOnTraineeActiveTrainers(String userId, String traineeId) {
         List<UserDto> allActiveUsers = userServiceClient.getAllActiveUsers().getBody();
 
         Map<String, UserDto> userById = allActiveUsers.stream()
@@ -182,7 +169,7 @@ public class UserOrchestrationServiceImpl implements UserOrchestrationService {
         List<TrainerServiceDto> allActiveTrainers = Optional.ofNullable(trainerServiceClient.getTrainersByIds(userIds).getBody())
                 .orElse(Collections.emptyList());
 
-        GetTraineeProfileResponse traineeProfile = getTraineeProfile(username);
+        GetTraineeProfileResponse traineeProfile = getTraineeProfile(userId, traineeId);
         List<com.shyn9yskhan.user_orchestration_service.dto.trainer.TrainerDto> assignedOnTraineeTrainers = Optional.ofNullable(traineeProfile)
                 .map(GetTraineeProfileResponse::trainers)
                 .orElse(Collections.emptyList());
@@ -212,12 +199,7 @@ public class UserOrchestrationServiceImpl implements UserOrchestrationService {
     }
 
     @Override
-    public UpdateTraineesTrainerListResponse updateTraineesTrainerList(String username, UpdateTraineesTrainerListRequest updateTraineesTrainerListRequest) {
-        GetUserServiceResponse getUserServiceResponse = userServiceClient.getUserByUsername(username).getBody();
-        String traineeUserId = getUserServiceResponse.getId();
-        GetTraineeByUserIdServiceResponse getTraineeByUserIdServiceResponse = traineeServiceClient.getTraineeByUserId(traineeUserId).getBody();
-        String traineeId = getTraineeByUserIdServiceResponse.getId();
-
+    public UpdateTraineesTrainerListResponse updateTraineesTrainerList(String traineeId, UpdateTraineesTrainerListRequest updateTraineesTrainerListRequest) {
         List<String> trainersUsernames = updateTraineesTrainerListRequest.trainersUsernames();
         List<UserDto> userDtos = userServiceClient.getUsersByUsernames(trainersUsernames).getBody();
 

@@ -1,7 +1,6 @@
 package com.shyn9yskhan.trainer_workload_service.service;
 
 import com.shyn9yskhan.trainer_workload_service.document.TrainerTrainingSummaryDocument;
-import com.shyn9yskhan.trainer_workload_service.domain.MonthSummary;
 import com.shyn9yskhan.trainer_workload_service.domain.TrainerTrainingSummary;
 import com.shyn9yskhan.trainer_workload_service.domain.Year;
 import com.shyn9yskhan.trainer_workload_service.dto.TrainerTrainingSummaryDto;
@@ -10,7 +9,6 @@ import com.shyn9yskhan.trainer_workload_service.dto.WorkloadEventRequest;
 import com.shyn9yskhan.trainer_workload_service.repository.TrainerTrainingSummaryRepository;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +27,6 @@ public class TrainerWorkloadServiceImpl implements TrainerWorkloadService {
     }
 
     @Override
-    @Transactional
     public void acceptWorkloadEvent(WorkloadEventRequest workloadEventRequest) {
         String trainerId = workloadEventRequest.trainerId();
         int year = workloadEventRequest.trainingDate().getYear();
@@ -84,7 +81,6 @@ public class TrainerWorkloadServiceImpl implements TrainerWorkloadService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public TrainerTrainingSummaryDto getTrainerSummary(String trainerId) {
         Optional<TrainerTrainingSummaryDocument> optionalTrainerTrainingSummaryDocument = trainerTrainingSummaryRepository.findById(trainerId);
         if (optionalTrainerTrainingSummaryDocument.isPresent()) {

@@ -2,8 +2,7 @@ package com.shyn9yskhan.user_orchestration_service.dto.trainee;
 
 import java.time.LocalDate;
 
-public record UpdateTraineeProfileRequest(String username,
-                                          String firstname,
+public record UpdateTraineeProfileRequest(String firstname,
                                           String lastname,
                                           LocalDate dateOfBirth,
                                           String address,

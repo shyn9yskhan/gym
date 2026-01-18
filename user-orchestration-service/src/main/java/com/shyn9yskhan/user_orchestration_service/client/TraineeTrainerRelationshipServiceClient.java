@@ -14,9 +14,9 @@ public interface TraineeTrainerRelationshipServiceClient {
     @GetMapping("/trainee-trainer-relationship/trainee/{traineeId}/trainers")
     ResponseEntity<List<String>> getTrainersForTrainee(@PathVariable String traineeId);
 
-    @GetMapping("/trainer/{trainerId}/trainees")
+    @GetMapping("/trainee-trainer-relationship/trainer/{trainerId}/trainees")
     ResponseEntity<List<String>> getTraineesForTrainer(@PathVariable String trainerId);
 
-    @PutMapping("/trainee/{traineeId}/trainers")
+    @PutMapping("/trainee-trainer-relationship/trainee/{traineeId}/trainers")
     ResponseEntity<Void> associateTraineeWithTrainers(@PathVariable String traineeId, @RequestBody List<String> trainerIds);
 }

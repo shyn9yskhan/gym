@@ -7,17 +7,19 @@ public class UserDto {
     private String username;
     private String password;
     private boolean isActive;
+    private Role role;
 
     public UserDto() {
     }
 
-    public UserDto(String userId, String firstname, String lastname, String username, String password, boolean isActive) {
+    public UserDto(String userId, String firstname, String lastname, String username, String password, boolean isActive, Role role) {
         this.userId = userId;
         this.firstname = firstname;
         this.lastname = lastname;
         this.username = username;
         this.password = password;
         this.isActive = isActive;
+        this.role = role;
     }
 
     public String getUserId() {
@@ -66,5 +68,13 @@ public class UserDto {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

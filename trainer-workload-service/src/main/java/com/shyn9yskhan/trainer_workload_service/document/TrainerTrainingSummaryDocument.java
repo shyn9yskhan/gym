@@ -1,13 +1,12 @@
 package com.shyn9yskhan.trainer_workload_service.document;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
 import java.util.List;
 
-@Document("trainer_training_summary")
+@DynamoDbBean
 public class TrainerTrainingSummaryDocument {
-    @Id
     private String trainerId;
     private List<YearDocument> years;
 
@@ -19,6 +18,7 @@ public class TrainerTrainingSummaryDocument {
         this.years = years;
     }
 
+    @DynamoDbPartitionKey
     public String getTrainerId() {
         return trainerId;
     }

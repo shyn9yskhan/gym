@@ -1,5 +1,8 @@
 package com.shyn9yskhan.trainer_workload_service.document;
 
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+
+@DynamoDbBean
 public class MonthSummaryDocument {
     private int month;
     private int trainingsSummaryDuration;

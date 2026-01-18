@@ -1,7 +1,9 @@
 package com.shyn9yskhan.trainer_workload_service.document;
 
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import java.util.List;
 
+@DynamoDbBean
 public class YearDocument {
     private int year;
     private List<MonthSummaryDocument> months;

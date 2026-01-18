@@ -12,21 +12,21 @@ public interface UserServiceClient {
     @PostMapping("/user")
     ResponseEntity<CreateUserServiceResponse> createUser(@RequestBody CreateUserServiceRequest createUserServiceRequest);
 
-    @GetMapping("/user/by-username/{username}")
-    ResponseEntity<GetUserServiceResponse> getUserByUsername(@PathVariable String username);
+    @GetMapping("/user/{userId}")
+    ResponseEntity<GetUserServiceResponse> getUser(@PathVariable String userId);
 
     @GetMapping("/user")
-    ResponseEntity<List<UserDto>> getUsersByIds(@RequestParam List<String> userIds);
+    ResponseEntity<List<UserDto>> getUsersByIds(@RequestParam List<String> ids);
 
-    @GetMapping
+    @GetMapping("/user")
     ResponseEntity<List<UserDto>> getUsersByUsernames(@RequestParam List<String> usernames);
 
-    @GetMapping("/active")
+    @GetMapping("/user/active")
     ResponseEntity<List<UserDto>> getAllActiveUsers();
 
-    @PutMapping("/user/by-username/{username}")
-    ResponseEntity<UpdateUserByUsernameServiceResponse> updateUserByUsername(@PathVariable String username, @RequestBody UpdateUserServiceRequest updateUserRequest);
+    @PutMapping("/user/{userId}")
+    ResponseEntity<UpdateUserServiceResponse> updateUser(@PathVariable String userId, @RequestBody UpdateUserServiceRequest updateUserRequest);
 
-    @DeleteMapping("/user/by-username/{username}")
-    ResponseEntity<DeleteUserByUsernameServiceResponse> deleteUserByUsername(@PathVariable String username);
+    @DeleteMapping("/user/{userId}")
+    ResponseEntity<Void> deleteUser(@PathVariable String userId);
 }

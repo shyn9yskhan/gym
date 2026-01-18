@@ -1,9 +1,6 @@
 package com.shyn9yskhan.user_orchestration_service.service;
 
-import com.shyn9yskhan.user_orchestration_service.client.dto.trainee.CreateTraineeServiceRequest;
-import com.shyn9yskhan.user_orchestration_service.client.dto.trainee.GetTraineeByIdResponse;
-import com.shyn9yskhan.user_orchestration_service.client.dto.trainee.GetTraineeByUserIdServiceResponse;
-import com.shyn9yskhan.user_orchestration_service.client.dto.trainee.UpdateTraineeServiceRequest;
+import com.shyn9yskhan.user_orchestration_service.client.dto.trainee.*;
 import com.shyn9yskhan.user_orchestration_service.client.dto.trainer.*;
 import com.shyn9yskhan.user_orchestration_service.client.dto.trainer.TrainerServiceDto;
 import com.shyn9yskhan.user_orchestration_service.client.dto.user.*;
@@ -23,6 +20,7 @@ public class RequestSplitterMerger {
                                                  CreateTraineeServiceRequest createTraineeServiceRequest) {
         createUserServiceRequest.setFirstname(createTraineeRequest.firstname());
         createUserServiceRequest.setLastname(createTraineeRequest.lastname());
+        createUserServiceRequest.setRole(Role.TRAINEE);
         createTraineeServiceRequest.setDateOfBirth(createTraineeRequest.dateOfBirth());
         createTraineeServiceRequest.setAddress(createTraineeRequest.address());
     }
@@ -32,7 +30,7 @@ public class RequestSplitterMerger {
     }
 
     public static GetTraineeProfileResponse mergeResponsesToGetTraineeProfileResponse(GetUserServiceResponse getUserServiceResponse,
-                                                                                      GetTraineeByUserIdServiceResponse getTraineeByUserIdServiceResponse,
+                                                                                      GetTraineeServiceResponse getTraineeServiceResponse,
                                                                                       List<TrainerServiceDto> trainerByIdRespons,
                                                                                       List<UserDto> userByIdServiceRespons) {
 
@@ -58,8 +56,8 @@ public class RequestSplitterMerger {
         return new GetTraineeProfileResponse(
                 getUserServiceResponse.getFirstname(),
                 getUserServiceResponse.getLastname(),
-                getTraineeByUserIdServiceResponse.getDateOfBirth(),
-                getTraineeByUserIdServiceResponse.getAddress(),
+                getTraineeServiceResponse.getDateOfBirth(),
+                getTraineeServiceResponse.getAddress(),
                 getUserServiceResponse.isActive(),
                 trainerDtos
         );
@@ -81,7 +79,7 @@ public class RequestSplitterMerger {
                                                  CreateTrainerServiceRequest createTrainerServiceRequest) {
         createUserServiceRequest.setFirstname(createTrainerRequest.firstname());
         createUserServiceRequest.setLastname(createTrainerRequest.lastname());
-
+        createUserServiceRequest.setRole(Role.TRAINER);
         createTrainerServiceRequest.setSpecialization(createTrainerRequest.trainingTypeId());
     }
 
@@ -91,7 +89,7 @@ public class RequestSplitterMerger {
 
     public static GetTrainerProfileResponse mergeResponsesToGetTrainerProfileResponse(
             GetUserServiceResponse getUserServiceResponse,
-            TrainerServiceDto getTrainerByUserIdServiceResponse,
+            GetTrainerServiceResponse getTrainerServiceResponse,
             List<GetTraineeByIdResponse> getTraineeByIdResponses,
             List<UserDto> userByIdServiceRespons) {
 
@@ -119,7 +117,7 @@ public class RequestSplitterMerger {
         return new GetTrainerProfileResponse(
                 getUserServiceResponse.getFirstname(),
                 getUserServiceResponse.getLastname(),
-                getTrainerByUserIdServiceResponse.getSpecialization(),
+                getTrainerServiceResponse.getSpecialization(),
                 getUserServiceResponse.isActive(),
                 traineeDtos
         );

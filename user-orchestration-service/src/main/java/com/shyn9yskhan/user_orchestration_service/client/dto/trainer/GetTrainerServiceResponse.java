@@ -1,23 +1,13 @@
 package com.shyn9yskhan.user_orchestration_service.client.dto.trainer;
 
-public class CreateTrainerServiceResponse {
-    private String id;
+public class GetTrainerServiceResponse {
     private String specialization;
 
-    public CreateTrainerServiceResponse() {
+    public GetTrainerServiceResponse() {
     }
 
-    public CreateTrainerServiceResponse(String id, String specialization) {
-        this.id = id;
+    public GetTrainerServiceResponse(String specialization) {
         this.specialization = specialization;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getSpecialization() {

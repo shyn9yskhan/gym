@@ -1,29 +1,19 @@
 package com.shyn9yskhan.user_orchestration_service.client.dto.user;
 
-public class UpdateUserByUsernameServiceResponse {
-    private String id;
+public class UpdateUserServiceResponse {
     private String username;
     private String firstname;
     private String lastname;
     private boolean isActive;
 
-    public UpdateUserByUsernameServiceResponse() {
+    public UpdateUserServiceResponse() {
     }
 
-    public UpdateUserByUsernameServiceResponse(String id, String username, String firstname, String lastname, boolean isActive) {
-        this.id = id;
+    public UpdateUserServiceResponse(String username, String firstname, String lastname, boolean isActive) {
         this.username = username;
         this.firstname = firstname;
         this.lastname = lastname;
         this.isActive = isActive;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getUsername() {
